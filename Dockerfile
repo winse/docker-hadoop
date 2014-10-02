@@ -35,6 +35,8 @@ RUN su hadoop -c \
 RUN su hadoop -c "mkdir -p /home/hadoop/tmp/pid"
 
 ENV HADOOP_PREFIX /opt/hadoop-2.5.1
+ENV JAVA_HOME /opt/jdk1.7.0_67
+ENV PATH $JAVE_HOME/bin:$PATH
 
 ADD etc/hadoop/core-site.xml $HADOOP_PREFIX/etc/hadoop/core-site.xml
 ADD etc/hadoop/hdfs-site.xml $HADOOP_PREFIX/etc/hadoop/hdfs-site.xml
