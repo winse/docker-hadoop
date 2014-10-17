@@ -16,7 +16,7 @@ service docker start
 git clone https://github.com/winse/docker-hadoop.git
 cd docker-hadoop
 # 在Dockerfile中使用了本地jdk和hadoop文件！
-docker build -t hadoop .
+docker build -t spark-yarn .
 ```
 
 运行之前，需要调整下Dockerfile。或者，先把压缩包先现在到本地后，启用tomcat来最终获取文件的。
@@ -72,9 +72,9 @@ addn-hosts=/etc/dnsmasq.hosts
 启动集群：
 
 ```
-[root@docker ~]# docker run -d  --dns 172.17.42.1 --name slaver1 -h slaver1 hadoop 
-[root@docker ~]# docker run -d  --dns 172.17.42.1 --name slaver2 -h slaver2 hadoop 
-[root@docker ~]# docker run -d  --dns 172.17.42.1 --name master -h master hadoop 
+[root@docker ~]# docker run -d  --dns 172.17.42.1 --name slaver1 -h slaver1 spark-yarn
+[root@docker ~]# docker run -d  --dns 172.17.42.1 --name slaver2 -h slaver2 spark-yarn
+[root@docker ~]# docker run -d  --dns 172.17.42.1 --name master -h master spark-yarn
 
 [root@docker ~]# docker ps 
 CONTAINER ID        IMAGE               COMMAND                CREATED             STATUS              PORTS               NAMES
@@ -82,7 +82,7 @@ f6e63b311e60        hadoop:latest       /bin/sh -c '/usr/sbi   6 seconds ago    
 454ae2c3e435        hadoop:latest       /bin/sh -c '/usr/sbi   13 seconds ago      Up 12 seconds       22/tcp              slaver2             
 7698230a03fb        hadoop:latest       /bin/sh -c '/usr/sbi   21 seconds ago      Up 20 seconds       22/tcp              slaver1             
 
-[root@docker ~]# docker ps | grep hadoop | awk '{print $1}' | xargs -I{} docker inspect -f '{{.NetworkSettings.IPAddress}} {{.Config.Hostname}}' {} > /etc/dnsmasq.hosts 
+[root@docker ~]# docker ps | grep spark-yarn | awk '{print $1}' | xargs -I{} docker inspect -f '{{.NetworkSettings.IPAddress}} {{.Config.Hostname}}' {} > /etc/dnsmasq.hosts 
 [root@docker ~]# service dnsmasq restart
 
 [root@docker ~]# ssh-copy-id hadoop@master
@@ -110,6 +110,11 @@ f6e63b311e60        hadoop:latest       /bin/sh -c '/usr/sbi   6 seconds ago    
   38 DataNode
   131 NodeManager
   240 Jps
+
+  [hadoop@master spark-1.1.0-bin-2.5.1]$ sbin/start-all.sh 
+  [hadoop@master spark-1.1.0-bin-2.5.1]$ /opt/jdk1.7.0_67/bin/jps  -m
+  266 Jps -m
+  132 Master --ip master --port 7077 --webui-port 8080
 ```
 
 如果你为ssh访问添加了隧道，还可以直接在windows本地通过浏览器访问web页面：

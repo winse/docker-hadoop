@@ -35,6 +35,9 @@ RUN curl -s http://172.17.42.1:8080/hadoop/jdk-7u67-linux-x64.tar.gz \
 #-- RUN wget http://apache.fayea.com/apache-mirror/hadoop/common/hadoop-2.5.1/hadoop-2.5.1.tar.gz 
 RUN su hadoop -c \
         "curl -s http://172.17.42.1:8080/hadoop/hadoop-2.5.1.tar.gz | tar zx --exclude=sources/* --exclude=doc/** --exclude=*.cmd -C /opt/"
+#--
+RUN su hadoop -c \
+	"curl -s http://172.17.42.1:8080/hadoop/spark-1.1.0-bin-2.5.1.tgz | tar zx --exclude=examples/* -C  /opt/"
 
 RUN su hadoop -c "mkdir -p /home/hadoop/tmp/pid"
 
@@ -48,9 +51,14 @@ ADD etc/hadoop/mapred-site.xml $HADOOP_PREFIX/etc/hadoop/mapred-site.xml
 ADD etc/hadoop/yarn-site.xml $HADOOP_PREFIX/etc/hadoop/yarn-site.xml
 ADD etc/hadoop/slaves $HADOOP_PREFIX/etc/hadoop/slaves
 
+# 每个版本可能有所不同，仅对其进行修改
 RUN sed -i '/export JAVA_HOME/c export JAVA_HOME=/opt/jdk1.7.0_67 \n export HADOOP_PID_DIR=/home/hadoop/tmp/pid' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
 
-RUN chown hadoop:hadoop $HADOOP_PREFIX/etc/hadoop/*
+ENV SPARK_HOME /opt/spark-1.1.0-bin-2.5.1
+ADD conf/spark-env.sh $SPARK_HOME/conf/spark-env.sh
+ADD etc/hadoop/slaves $SPARK_HOME/conf/slaves
+
+RUN chown hadoop:hadoop $HADOOP_PREFIX/etc/hadoop/* $SPARK_HOME/conf/*
 
 # SSH
 
