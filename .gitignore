@@ -1,2 +1,2 @@
-hadoop-2.5.1.tar.gz
-jdk-7u67-linux-x64.tar.gz
+*.tar.gz
+*.tgz

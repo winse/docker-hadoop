@@ -10,6 +10,10 @@ RUN yum install -y which nc wget curl tar rsync openssh-clients openssh-server e
 RUN ssh-keygen -P '' -t rsa -f /etc/ssh/ssh_host_rsa_key
 RUN ssh-keygen -P '' -t dsa -f /etc/ssh/ssh_host_dsa_key
 
+RUN su root -c "ssh-keygen -P '' -t rsa -f ~/.ssh/id_rsa"
+# ssh-copy-id not work, sshd isnot started!
+RUN su root -c "cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys"
+
 RUN sed -i '/pam_loginuid.so/c session    optional     pam_loginuid.so'  /etc/pam.d/sshd
 
 RUN echo 'root:hadoop' | chpasswd 
@@ -51,6 +55,7 @@ RUN chown hadoop:hadoop $HADOOP_PREFIX/etc/hadoop/*
 # SSH
 
 RUN su hadoop -c "ssh-keygen -P '' -t rsa -f /home/hadoop/.ssh/id_rsa"
+RUN su hadoop -c "cat ~/.ssh/id_rsa.pub > ~/.ssh/authorized_keys"
 
 EXPOSE 22
 CMD /usr/sbin/sshd -D
