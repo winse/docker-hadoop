@@ -226,7 +226,6 @@ kube::multinode::start_k8s_master() {
 
 # Start dashboard
 kube::multinode::start_k8s_master_dashboard() {
-
   kube::log::status "Launching dashboard..."
   
   # Wait for the kubelet started.
@@ -238,6 +237,10 @@ kube::multinode::start_k8s_master_dashboard() {
     fi
     sleep 1
   done
+  
+  if ! kubectl get ns | grep kube-system ; then
+    kubectl create namespace kube-system
+  fi
   
   kubectl delete -f kubernetes-dashboard.yaml
   sed -e "s|MASTER_IP|${IP_ADDRESS}|g" kubernetes-dashboard.yaml | kubectl create -f - 

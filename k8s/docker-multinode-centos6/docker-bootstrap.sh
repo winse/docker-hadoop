@@ -55,8 +55,8 @@ kube::bootstrap::restart_docker(){
     kube::helpers::backup_file ${DOCKER_CONF}
 
     # Is there an uncommented OPTIONS line at all?
-    if grep "other_args=" ${DOCKER_CONF} ; then
-      kube::helpers::replace_mtu_bip ${DOCKER_CONF} "other_args="
+    if grep "other_args=\"" ${DOCKER_CONF} >/dev/null ; then
+      kube::helpers::replace_mtu_bip ${DOCKER_CONF} "other_args=\""
     elif [[ -z $(grep "OPTIONS" ${DOCKER_CONF} | grep -v "#") ]]; then
       echo "OPTIONS=\"--mtu=${FLANNEL_MTU} --bip=${FLANNEL_SUBNET} \"" >> ${DOCKER_CONF}
     else

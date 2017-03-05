@@ -44,10 +44,7 @@ fi
 
 kube::multinode::start_k8s_master
 
-# If under v1.3.0, run the proxy
-if [[ $((VERSION_MINOR < 3)) == 1 ]]; then
-
-	kube::multinode::start_k8s_master_dashboard
-fi
+# If under v1.3.0, run the dashboard 
+. dashboard.sh inline
 
 kube::log::status "Done. It may take about a minute before apiserver is up."
