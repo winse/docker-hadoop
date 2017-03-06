@@ -225,8 +225,8 @@ kube::multinode::start_k8s_master() {
 }
 
 # Start dashboard
-kube::multinode::start_k8s_master_dashboard() {
-  kube::log::status "Launching dashboard..."
+kube::multinode::start_k8s_master_addon() {
+  kube::log::status "Launching addon..."
   
   # Wait for the kubelet started.
   local SECONDS=0
@@ -242,8 +242,14 @@ kube::multinode::start_k8s_master_dashboard() {
     kubectl create namespace kube-system
   fi
   
+  kube::log::status "Launching dns..."
+  kubectl delete -f skydns.yaml
+  sed -e "s/ARCH/${ARCH}/g;" -e "s|MASTER_IP|${IP_ADDRESS}|g"  skydns.yaml | kubectl create -f -
+  
+  kube::log::status "Launching dashboard..."
   kubectl delete -f kubernetes-dashboard.yaml
   sed -e "s|MASTER_IP|${IP_ADDRESS}|g" kubernetes-dashboard.yaml | kubectl create -f - 
+  
 }
 
 # Start kubelet in a container, for a worker node

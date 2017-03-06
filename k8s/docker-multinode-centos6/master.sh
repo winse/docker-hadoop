@@ -45,6 +45,6 @@ fi
 kube::multinode::start_k8s_master
 
 # If under v1.3.0, run the dashboard 
-. dashboard.sh inline
+. addon.sh inline
 
 kube::log::status "Done. It may take about a minute before apiserver is up."
