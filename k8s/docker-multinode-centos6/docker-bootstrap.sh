@@ -55,7 +55,9 @@ kube::bootstrap::restart_docker(){
     kube::helpers::backup_file ${DOCKER_CONF}
 
     # Is there an uncommented OPTIONS line at all?
-    if grep "other_args=\"" ${DOCKER_CONF} >/dev/null ; then
+    if  grep "other_args=\"" ${DOCKER_CONF} | grep -v '#'  >/dev/null ; then
+      # 添加双引号
+      sed -i -re 's/other_args="?([^"]*)"?/other_args="\1"/g' ${DOCKER_CONF} 
       kube::helpers::replace_mtu_bip ${DOCKER_CONF} "other_args=\""
     elif [[ -z $(grep "OPTIONS" ${DOCKER_CONF} | grep -v "#") ]]; then
       echo "OPTIONS=\"--mtu=${FLANNEL_MTU} --bip=${FLANNEL_SUBNET} \"" >> ${DOCKER_CONF}
@@ -113,15 +115,15 @@ kube::helpers::replace_mtu_bip(){
 
   # Assuming is a $SEARCH_FOR statement already, and we should append the options if they do not exist
   if [[ -z $(grep -- "--mtu=" $DOCKER_CONF) ]]; then
-    sed -e "s@$(grep "$SEARCH_FOR" $DOCKER_CONF)@$(grep "$SEARCH_FOR" $DOCKER_CONF) --mtu=${FLANNEL_MTU}@g" -i $DOCKER_CONF
+    sed -e "/^[^#]/s@$SEARCH_FOR@$SEARCH_FOR --mtu=${FLANNEL_MTU}@g" -i $DOCKER_CONF
   fi
   if [[ -z $(grep -- "--bip=" $DOCKER_CONF) ]]; then
-    sed -e "s@$(grep "$SEARCH_FOR" $DOCKER_CONF)@$(grep "$SEARCH_FOR" $DOCKER_CONF) --bip=${FLANNEL_SUBNET}@g" -i $DOCKER_CONF
+    sed -e "/^[^#]/s@$SEARCH_FOR@$SEARCH_FOR --bip=${FLANNEL_SUBNET}@g" -i $DOCKER_CONF
   fi
 
   # Finds "--mtu=????" and replaces with "--mtu=${FLANNEL_MTU}"
   # Also finds "--bip=??.??.??.??" and replaces with "--bip=${FLANNEL_SUBNET}"
   # NOTE: This method replaces a whole 'mtu' or 'bip' expression. If it ends with a punctuation mark it will be truncated.
   # Please add additional space before the punctuation mark to prevent this. For example: "--mtu=${FLANNEL_MTU} --bip=${FLANNEL_SUBNET} ".
-  sed -e "s@$(grep -o -- "--mtu=[[:graph:]]*" $DOCKER_CONF)@--mtu=${FLANNEL_MTU}@g;s@$(grep -o -- "--bip=[[:graph:]]*" $DOCKER_CONF)@--bip=${FLANNEL_SUBNET}@g" -i $DOCKER_CONF
+  sed -e "/^[^#]/s@$(grep -o -- "--mtu=[[:graph:]]*" $DOCKER_CONF)@--mtu=${FLANNEL_MTU}@g;/^[^#]/s@$(grep -o -- "--bip=[[:graph:]]*" $DOCKER_CONF)@--bip=${FLANNEL_SUBNET}@g" -i $DOCKER_CONF
 }
