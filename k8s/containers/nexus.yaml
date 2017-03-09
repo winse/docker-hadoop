@@ -1,0 +1,53 @@
+# https://github.com/sonatype/docker-nexus
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nexus
+  labels:
+    app: nexus
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+      - name: nexus
+        image: sonatype/nexus:oss
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8081
+        volumeMounts:
+        - name: nexus-storage
+          mountPath: /sonatype-work
+        env:
+        - name: CONTEXT_PATH
+          value: /nexus
+        - name: MAX_HEAP
+          value: 1024m
+        - name: MIN_HEAP
+          value: 1024m
+      volumes:
+      - name: nexus-storage
+        hostPath:
+          path: /data/nexus
+      nodeSelector:
+        hostname: cu1
+---
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nexus-service
+  labels: 
+    app: nexus
+spec: 
+  ports:
+    # the port that this service should serve on
+    - port: 8081
+  externalIPs: [
+    "192.168.0.37"
+  ]
+  selector: 
+    app: nexus
