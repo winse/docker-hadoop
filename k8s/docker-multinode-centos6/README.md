@@ -1,6 +1,6 @@
 文档参考： <https://kubernetes.io/docs/getting-started-guides/docker-multinode/>
 
-1. 下载镜像
+* 下载镜像
 
 ```
 [root@cu2 ~]# docker images
@@ -19,9 +19,9 @@ gcr.io/google_containers/exechealthz-amd64            1.0                 5b9ac1
 gcr.io/google_containers/pause                        2.0                 9981ca1bbdb5        17 months ago       350.2 kB
 ```
 
-2. 下载kubectl-v1.2.7
+* 下载kubectl-v1.2.7
 
-3. Master
+* Master
 
 ```
 ./master.sh
@@ -34,7 +34,7 @@ curl -s http://localhost:8080/api
 kubectl get pods
 ```
 
-4. Worker
+* Worker
 
 ```
 MASTER_IP=cu2 ./worker.sh
