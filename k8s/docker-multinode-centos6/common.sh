@@ -233,7 +233,8 @@ kube::multinode::start_k8s_master_addon() {
   while [[ $(curl -fsSL http://localhost:8080/healthz 2>&1 1>/dev/null; echo $?) != 0 ]]; do
     ((SECONDS++))
     if [[ ${SECONDS} == ${TIMEOUT_FOR_SERVICES} ]]; then
-      kube::log::fatal "kubelet failed to start. Exiting..."
+      # setup need download easy-rsa from storage.googleapis.com may be timeout...
+      kube::log::fatal "kubelet failed to start, may be setup need download easy-rsa from googleapis. Exiting..."
     fi
     sleep 1
   done
@@ -250,6 +251,9 @@ kube::multinode::start_k8s_master_addon() {
   kubectl delete -f kubernetes-dashboard.yaml
   sed -e "s|MASTER_IP|${IP_ADDRESS}|g" kubernetes-dashboard.yaml | kubectl create -f - 
   
+  kube::log::status "Launching heapster..."
+  kubectl delete -f influxdb/
+  for file in influxdb/*.yaml ; do sed -e "s|MASTER_IP|${IP_ADDRESS}|g" $file | kubectl create -f - ; done
 }
 
 # Start kubelet in a container, for a worker node
