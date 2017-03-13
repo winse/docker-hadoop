@@ -3,11 +3,8 @@
 ######################################
 # fix container config
 
-mkdir /tmp/config 
-cd /tmp/config 
-
 # kubectl get pods --show-labels
-TEMP=$( mktemp -d harbor_XXXX )
+TEMP=$( mktemp -d /tmp/config_harbor_XXXX )
 cd $TEMP
 
 for name in registry ui jobservice nginx ; do
@@ -41,4 +38,4 @@ set +x
 
 done
 
-rm -rf /tmp/config
+rm -rf $TEMP
