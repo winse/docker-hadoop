@@ -27,9 +27,9 @@ spec:
         - name: CONTEXT_PATH
           value: /nexus
         - name: MAX_HEAP
-          value: 1024m
+          value: 256m
         - name: MIN_HEAP
-          value: 1024m
+          value: 256m
       volumes:
       - name: nexus-storage
         hostPath:
