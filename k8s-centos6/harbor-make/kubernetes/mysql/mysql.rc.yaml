@@ -32,3 +32,5 @@ spec:
       - name: mysql-storage
         persistentVolumeClaim:
           claimName: storage-pvc 
+      nodeSelector:
+        hostname: cu3

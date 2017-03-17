@@ -1,3 +1,0 @@
-scl enable python27 bash 
-
-/opt/rh/python27/root/usr/bin/python2.7 "$@"

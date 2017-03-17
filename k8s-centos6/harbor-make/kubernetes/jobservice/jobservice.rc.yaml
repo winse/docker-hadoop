@@ -110,3 +110,5 @@ spec:
       - name: logs
         persistentVolumeClaim:
           claimName: log-pvc 
+      nodeSelector:
+        hostname: cu3

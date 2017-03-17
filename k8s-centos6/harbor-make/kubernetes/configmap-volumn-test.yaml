@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cm-volumn-test
+spec:
+  containers:
+  - name: nginx-app
+    image: nginx:1.11.5
+    imagePullPolicy: IfNotPresent
+    command:
+    - cat
+    - "/etc/nginx/nginx.conf"
+    volumeMounts:
+    - name: config
+      mountPath: /etc/nginx
+  volumes: 
+  - name: config
+    configMap:
+      name: harbor-nginx-config
+      items:
+      - key: config
+        path: nginx.conf
+      - key: pkey
+        path: https.key
+      - key: cert
+        path: https.crt

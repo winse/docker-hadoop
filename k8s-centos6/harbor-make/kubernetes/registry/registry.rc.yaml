@@ -37,3 +37,5 @@ spec:
       - name: storage
         persistentVolumeClaim:
           claimName: registry-pvc
+      nodeSelector:
+        hostname: cu3

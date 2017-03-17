@@ -172,3 +172,5 @@ spec:
             path: app.conf
           - key: pkey
             path: private_key.pem
+      nodeSelector:
+        hostname: cu3

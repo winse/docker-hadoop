@@ -48,7 +48,7 @@ kube::multinode::main(){
     ETCD_VERSION=${ETCD_VERSION:-"3.0.4"}
   fi
 
-  FLANNEL_VERSION=${FLANNEL_VERSION:-"v0.6.1"}
+  FLANNEL_VERSION=${FLANNEL_VERSION:-"v0.7.0"}
   FLANNEL_IPMASQ=${FLANNEL_IPMASQ:-"true"}
   FLANNEL_BACKEND=${FLANNEL_BACKEND:-"udp"}
   FLANNEL_NETWORK=${FLANNEL_NETWORK:-"10.1.0.0/16"}
@@ -233,8 +233,7 @@ kube::multinode::start_k8s_master_addon() {
   while [[ $(curl -fsSL http://localhost:8080/healthz 2>&1 1>/dev/null; echo $?) != 0 ]]; do
     ((SECONDS++))
     if [[ ${SECONDS} == ${TIMEOUT_FOR_SERVICES} ]]; then
-      # setup need download easy-rsa from storage.googleapis.com may be timeout...
-      kube::log::fatal "kubelet failed to start, may be setup need download easy-rsa from googleapis. Exiting..."
+      kube::log::fatal "kubelet failed to start. Exiting..."
     fi
     sleep 1
   done
@@ -298,7 +297,11 @@ kube::multinode::start_k8s_worker_proxy() {
 
 # Turndown the local cluster
 kube::multinode::turndown(){
+  kube::multinode::turndown::bootstrap
+  kube::multinode::turndown::main
+}
 
+kube::multinode::turndown::bootstrap(){
   # Check if docker bootstrap is running
   DOCKER_BOOTSTRAP_PID=$(ps aux | grep ${BOOTSTRAP_DOCKER_SOCK} | grep -v "grep" | awk '{print $2}')
   if [[ ! -z ${DOCKER_BOOTSTRAP_PID} ]]; then
@@ -309,7 +312,9 @@ kube::multinode::turndown(){
     docker -H ${BOOTSTRAP_DOCKER_SOCK} rm -f $(docker -H ${BOOTSTRAP_DOCKER_SOCK} ps -q) >/dev/null 2>/dev/null
     kill ${DOCKER_BOOTSTRAP_PID}
   fi
+}
 
+kube::multinode::turndown::main(){
   kube::log::status "Killing all kubernetes containers..."
 
   if [[ $(docker ps | grep "kube_" | awk '{print $1}' | wc -l) != 0 ]]; then
@@ -365,9 +370,9 @@ kube::multinode::make_shared_kubelet_dir() {
   # This only has to be done when the host doesn't use systemd
   if ! kube::helpers::command_exists systemctl; then
     mkdir -p /var/lib/kubelet
-    mount --bind /var/lib/kubelet /var/lib/kubelet
-    mount --make-shared /var/lib/kubelet
-
+    mount --rbind /var/lib/kubelet /var/lib/kubelet
+    mount --make-rshared /var/lib/kubelet
+    
     kube::log::status "Mounted /var/lib/kubelet with shared propagnation"
   fi
 }

@@ -4,4 +4,3 @@ IP_ADDRESS=${IP_ADDRESS:-${DEFAULT_IP_ADDRESS}}
 
 sed -e "s/ARCH/${ARCH}/g;" -e "s|MASTER_IP|${IP_ADDRESS}|g"  skydns.yaml | kubectl create -f -
 
-# for file in * ; do sed -e "s|MASTER_IP|${IP_ADDRESS}|g" $file | kubectl create -f - ; done

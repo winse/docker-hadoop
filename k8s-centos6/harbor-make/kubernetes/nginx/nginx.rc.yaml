@@ -34,3 +34,5 @@ spec:
             path: https.key
           - key: cert
             path: https.crt
+      nodeSelector:
+        hostname: cu3

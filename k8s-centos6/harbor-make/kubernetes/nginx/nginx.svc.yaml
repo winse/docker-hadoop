@@ -3,6 +3,7 @@ kind: Service
 metadata:
   name: nginx
 spec:
+  clusterIP: 10.0.0.78
   ports:
     - name: http
       port: 80

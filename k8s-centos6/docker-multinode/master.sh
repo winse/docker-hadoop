@@ -17,6 +17,8 @@
 # Source common.sh
 source $(dirname "${BASH_SOURCE}")/common.sh
 
+KUBE_RESET=${1:-"ALL"}
+
 # Set MASTER_IP to localhost when deploying a master
 MASTER_IP=localhost
 
@@ -24,22 +26,24 @@ kube::multinode::main
 
 kube::multinode::log_variables
 
-kube::multinode::turndown
-
-if [[ ${USE_CNI} == "true" ]]; then
-  kube::cni::ensure_docker_settings
-
-  kube::multinode::start_etcd
-
-  kube::multinode::start_flannel
-else
-  kube::bootstrap::bootstrap_daemon
-
-  kube::multinode::start_etcd
-
-  kube::multinode::start_flannel
-
-  kube::bootstrap::restart_docker
+if [[ ${KUBE_RESET} == "ALL" ]] ; then
+  kube::multinode::turndown
+  
+  if [[ ${USE_CNI} == "true" ]]; then
+    kube::cni::ensure_docker_settings
+  
+    kube::multinode::start_etcd
+  
+    kube::multinode::start_flannel
+  else
+    kube::bootstrap::bootstrap_daemon
+  
+    kube::multinode::start_etcd
+  
+    kube::multinode::start_flannel
+  
+    kube::bootstrap::restart_docker
+  fi
 fi
 
 kube::multinode::start_k8s_master

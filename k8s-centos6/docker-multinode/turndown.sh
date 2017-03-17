@@ -17,9 +17,16 @@
 # Source common.sh
 source $(dirname "${BASH_SOURCE}")/common.sh
 
+# empty args will stop and delete bootstrap containers.
+KUBE_RESET=${1:-"ALL"}
+
 kube::multinode::main
 
 # Turndown kubernetes in docker
-kube::multinode::turndown
+if [[ ${KUBE_RESET} == "ALL" ]] ; then
+  kube::multinode::turndown
+else
+  kube::multinode::turndown::main
+fi
 
 kube::log::status "Done."
