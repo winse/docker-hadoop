@@ -73,7 +73,7 @@ kube::multinode::main(){
     CONTAINERIZED_FLAG="--containerized"
   else
     ROOTFS_MOUNT=""
-    KUBELET_MOUNT="-v /var/lib/kubelet:/var/lib/kubelet:z"
+    KUBELET_MOUNT="-v /var/lib/kubelet:/var/lib/kubelet:z" # docker1.7的volumn没有shared参数
     CONTAINERIZED_FLAG=""
   fi
 

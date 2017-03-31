@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: redis-data-rc
+  labels:
+    name: redis-data-rc
+spec:
+  replicas: 6
+  selector:
+    name: redis-data-apps
+  template:
+    metadata:
+      labels:
+        name: redis-data-apps
+    spec:
+      containers:
+      - name: redis-data-app
+        image: cu.eshore.cn/library/codis:3.2
+        imagePullPolicy: IfNotPresent
+        command:
+        - codis-server 
+        - "--dir"
+        - "/data/redis"
+        - "--protected-mode"
+        - "no"
+        volumeMounts:
+        - name: redis-storage
+          mountPath: /data/redis
+      volumes:
+      - name: redis-storage
+        emptyDir: {}

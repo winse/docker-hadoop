@@ -1,0 +1,37 @@
+# https://github.com/sonatype/docker-nexus3
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nexus3
+  labels:
+    app: nexus3
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: nexus3
+    spec:
+      containers:
+      - name: nexus3
+        image: sonatype/nexus3
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8081
+        volumeMounts:
+        - name: nexus3-storage
+          mountPath: /nexus-data
+        env:
+        - name: NEXUS_CONTEXT
+          value: /
+        - name: JAVA_MAX_MEM
+          value: 1024m
+        - name: JAVA_MIN_MEM
+          value: 1024m
+      volumes:
+      - name: nexus3-storage
+        hostPath:
+          path: /data/nexus3
+      nodeSelector:
+        hostname: cu1
