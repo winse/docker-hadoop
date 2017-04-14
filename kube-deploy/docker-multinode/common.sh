@@ -48,7 +48,7 @@ kube::multinode::main(){
     ETCD_VERSION=${ETCD_VERSION:-"3.0.4"}
   fi
 
-  FLANNEL_VERSION=${FLANNEL_VERSION:-"v0.6.1"}
+  FLANNEL_VERSION=${FLANNEL_VERSION:-"v0.7.0"}
   FLANNEL_IPMASQ=${FLANNEL_IPMASQ:-"true"}
   FLANNEL_BACKEND=${FLANNEL_BACKEND:-"udp"}
   FLANNEL_NETWORK=${FLANNEL_NETWORK:-"10.1.0.0/16"}
@@ -199,6 +199,7 @@ kube::multinode::start_flannel() {
 
 # Start kubelet first and then the master components as pods
 kube::multinode::start_k8s_master() {
+
   kube::multinode::create_kubeconfig
   kube::log::status "Launching Kubernetes master components..."
 
@@ -227,6 +228,7 @@ kube::multinode::start_k8s_master() {
 
 # Start kubelet in a container, for a worker node
 kube::multinode::start_k8s_worker() {
+
   kube::multinode::create_kubeconfig
   kube::log::status "Launching Kubernetes worker components..."
 
