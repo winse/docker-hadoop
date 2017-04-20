@@ -1,0 +1,10 @@
+#!/bin/sh
+
+rm -rf /etc/localtime ; ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ;
+ln -s /opt/bin/hadoop.profile /etc/profile.d/hadoop.sh ;
+ln -s /opt/bin/hadoop.limits /etc/security/limits.d/hadoop.conf ;
+chown -R hadoop:hadoop /data
+chmod 700 /data;
+chmod 700 /data/bigdata;
+
+gosu hadoop:hadoop sh /opt/bin/startup "$@" 

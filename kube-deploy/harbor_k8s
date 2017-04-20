@@ -1,0 +1,65 @@
+#!/bin/sh
+set -x
+
+cd "$(dirname $0)"
+OP=${1:-"apply"}
+
+cd harbor-make/kubernetes
+python prepare
+
+######################################
+# containers
+
+kubectl $OP -f pv/
+
+kubectl $OP -f jobservice/jobservice.cm.yaml
+kubectl $OP -f mysql/mysql.cm.yaml
+kubectl $OP -f nginx/nginx.cm.yaml
+kubectl $OP -f registry/registry.cm.yaml
+kubectl $OP -f ui/ui.cm.yaml
+
+kubectl $OP -f jobservice/jobservice.svc.yaml
+kubectl $OP -f mysql/mysql.svc.yaml
+kubectl $OP -f nginx/nginx.svc.yaml
+kubectl $OP -f registry/registry.svc.yaml
+kubectl $OP -f ui/ui.svc.yaml
+
+kubectl $OP -f registry/registry.rc.yaml
+kubectl $OP -f mysql/mysql.rc.yaml
+kubectl $OP -f jobservice/jobservice.rc.yaml
+kubectl $OP -f ui/ui.rc.yaml
+kubectl $OP -f nginx/nginx.rc.yaml
+
+# 
+cd -
+
+HOSTS=$( cat hosts | awk '{print $2}' | grep -v -E '$\s*^' )
+
+#########
+# Rsync Harbor
+sed -i '/cu.eshore.cn/d' /etc/hosts
+
+if [ "$OP" == "apply" ] ; then
+  for ((i=0;i<11;i++)) ; do 
+    sleep 1;
+    echo -n '.';
+  done
+
+  cat >>/etc/hosts <<EOF
+$( kubectl get service nginx -n default -o jsonpath="{..clusterIP}" ) cu.eshore.cn
+EOF
+  echo "Updated Local Hosts"
+
+  for h in $HOSTS ; do
+    if [[ $h != "$(hostname)" ]] ; then
+      rsync -az /etc/hosts $h:/etc/
+    fi
+  
+    ssh $h "mkdir -p /etc/docker/certs.d/cu.eshore.cn/"
+    chmod 600 ../easy-rsa/easyrsa3/pki/ca.crt
+    rsync -az ../easy-rsa/easyrsa3/pki/ca.crt $h:/etc/docker/certs.d/cu.eshore.cn/
+
+    ssh $h "docker login -u admin -p Harbor12345 cu.eshore.cn"
+  done
+  echo "Harbor Rsync Succeeded"
+fi

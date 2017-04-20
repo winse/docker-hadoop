@@ -2,33 +2,7 @@
 
 cd "$(dirname $0)"
 
-SERVICES="$@"
 HOSTS=$( cat hosts | awk '{print $2}' | grep -v -E '$\s*^' )
-
-#########
-# Harbor
-if echo "$SERVICES" | grep harbor >/dev/null ; then 
-
-  sed -i '/cu.eshore.cn/d' /etc/hosts
-
-  cat >>/etc/hosts <<EOF
-$( kubectl get service nginx -n default -o jsonpath="{..clusterIP}" ) cu.eshore.cn
-EOF
-  echo "Updated Local Hosts"
-
-  for h in $HOSTS ; do
-    if [[ $h != "$(hostname)" ]] ; then
-      rsync -az /etc/hosts $h:/etc/
-    fi
-
-    ssh $h "mkdir -p /etc/docker/certs.d/cu.eshore.cn/"
-    rsync -az /data/kubernetes/easy-rsa/easyrsa3/pki/ca.crt $h:/etc/docker/certs.d/cu.eshore.cn/
-
-    ssh $h "docker login -u admin -p Harbor12345 cu.eshore.cn"
-  done
-  echo "Harbor Rsync Succeeded"
-
-fi 
 
 ########
 # Deploy

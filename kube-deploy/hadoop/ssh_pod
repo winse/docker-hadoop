@@ -1,0 +1,17 @@
+#!/bin/sh
+
+if [[ $# != 2 ]] ; then
+  echo "Usage: $0 podName namespace"
+  exit 1
+fi 
+
+PODS=$1
+NAMESPACE=$2
+
+NODE=$( kubectl describe pods $PODS -n $NAMESPACE  | grep -E "Node" | awk -F'/' '{print $2}' )
+CONTAINER=$( kubectl describe pods $PODS -n $NAMESPACE  | grep -E "Container ID" | awk -F'/' '{print $3}' )
+
+# ssh $( kubectl describe pods hadoop-master2 -n hd1  | grep -E "Node" | awk -F'/' '{print $2}' )
+# docker exec -ti $( kubectl describe pods hadoop-master2 -n hd1  | grep -E "Container ID" | awk -F'/' '{print $3}' ) bash
+
+ssh -t $NODE docker exec -ti $CONTAINER bash

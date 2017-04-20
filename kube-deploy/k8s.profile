@@ -5,3 +5,5 @@ export KUBECONFIG=/var/lib/kubelet/kubeconfig/kubeconfig.yaml
 export PATH=/data/kubernetes/kube-deploy/docker-multinode:$PATH
 
 export MASTER_IP=cu3
+
+export HADOOP_DEPLOY=/data/kubernetes/kube-deploy/hadoop/

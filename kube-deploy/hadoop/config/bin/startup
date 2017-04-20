@@ -12,15 +12,15 @@ ln -s /data/bigdata/logs /opt/hadoop-2.6.5/
 
 function check(){
   APP="$1"
-  ps aux|grep java|grep "$APP" >/dev/null
+  ps aux|grep java|grep -i "$APP"
   return $?
 }
 
 function checkAll(){
-  times=24
+  times=36
   while ((times>0)) ; do
     echo -n '.' 
-    sleep 1;
+    sleep 11;
     for app in "$@" ; do
       if ! check "$app" ; then
         ((times--))

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: slaver-app
-        image: cu.eshore.cn/library/hadoop:root
+        image: cu.eshore.cn/library/hadoop:2.6.5
         imagePullPolicy: IfNotPresent
         resources:
           limits:
@@ -25,20 +25,10 @@ spec:
           requests:
             cpu: "1"
             memory: 512Mi
-        lifecycle:
-          postStart:
-            exec:
-              command:
-              - bash
-              - -c
-              - rm -rf /etc/localtime ; ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime ;
-                chown hadoop:hadoop /data ; chmod 700 /data; 
-                ln -s /opt/bin/hadoop.profile /etc/profile.d/hadoop.sh ;
-                ln -s /opt/bin/hadoop.limits /etc/security/limits.d/hadoop.conf ;
         command: ["bash", "-c"]
-        args:
+        args: 
         - chmod +x /opt/bin/bootstrap;
-          gosu hadoop:hadoop /opt/bin/bootstrap Slaver; 
+          /opt/bin/bootstrap slaver
         env:
           - name: TERM
             value: xterm

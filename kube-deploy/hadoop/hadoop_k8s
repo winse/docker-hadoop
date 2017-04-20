@@ -1,0 +1,96 @@
+#!/bin/sh
+
+if [[ $# > 1 ]] ; then
+  OP=$1
+  if [ "$OP" == "delete" ] ; then
+    shift
+    kubectl delete namespace "$@"
+    exit $?
+  fi
+fi
+
+K8S_CONFIG_DIR=$(pwd)/kubenetes
+namespace=${1:-"default"}
+
+##1. configmap
+
+# get hadoop config files.
+function setting(){
+  cd config/hadoop
+
+  echo "
+  hadoop-env.sh: |
+$( cat hadoop-env.sh | sed 's/^/    /' )
+$( cat ../hadoop.cfg | sed 's/^/    /' )
+"
+
+  ls | grep -v 'hadoop-env.sh' | while read file; do  
+    echo "
+  ${file}: |
+$( cat $file | sed 's/^/    /' )
+"
+  done
+}
+
+# get bin files.
+function bin(){
+  cd config/bin
+
+  ls | while read file; do  
+    echo "
+  ${file}: |
+$( cat $file | sed 's/^/    /' )
+"
+  done
+}
+
+# write yaml.
+cat >$K8S_CONFIG_DIR/hadoop.cm.yaml <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dta-hadoop-config
+data:
+$( setting )
+EOF
+
+
+cat >$K8S_CONFIG_DIR/bin.cm.yaml <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dta-bin-config
+data:
+$( bin )
+EOF
+
+cat >$K8S_CONFIG_DIR/ns.yaml <<EOF
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: $namespace
+EOF
+
+kubectl apply -f $K8S_CONFIG_DIR/ns.yaml
+
+kubectl apply -f $K8S_CONFIG_DIR/hadoop.cm.yaml -n $namespace
+kubectl apply -f $K8S_CONFIG_DIR/bin.cm.yaml -n $namespace
+
+##2. run
+
+kubectl apply -f $K8S_CONFIG_DIR/hadoop-master2.yaml -n $namespace
+kubectl apply -f $K8S_CONFIG_DIR/hadoop-slaver.yaml -n $namespace
+
+sleep 2
+
+##3. modify hosts
+
+sed -i '/# K8S HADOOP/,/# @K8S HADOOP/d' /etc/hosts
+
+cat >>/etc/hosts <<EOF
+# K8S HADOOP
+$( kubectl get pods -o wide --all-namespaces --show-labels=true | grep "cluster=dta" | awk '{print $7" "$2"."$1}' )
+# @K8S HADOOP
+EOF
+echo "Updated local /etc/hosts"
+
