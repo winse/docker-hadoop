@@ -58,11 +58,34 @@ cd kube-deploy/docker-multinode/
 
 系统后给node打标签，运行 kube-deploy/label.sh 脚本，通过hostname更好识别主机。
 
-## 运行HADOOP
+## 部署私有仓库Harbor
+
+```
+kube-deploy/easy-rsa.sh 
+
+vi kube-deploy/harbor-make/harbor.cfg
+hostname = DOMAIN
+ui_url_protocol = https
+ssl_cert = crt PATH
+ssl_cert_key = key PATH
+
+# 把yaml里面的配置修改成你本地对应的镜像名
+find kubernetes/ -name "*.rc.yaml" 
+kubernetes/nginx/nginx.rc.yaml
+kubernetes/mysql/mysql.rc.yaml
+kubernetes/registry/registry.rc.yaml
+kubernetes/ui/ui.rc.yaml
+kubernetes/jobservice/jobservice.rc.yaml
+
+kube-deploy/harbor_k8s
+```
+
+## 编译部署HADOOP
 
 首选需要制作镜像，有参考网上的Dockerfile的写法。同时结合后面的yaml配置，使用ConfigMap的方式来部署配置和真正的运行脚本：
 
 第一步： 下载JDK、HADOOP
+
 第二步： 根据镜像的版本编译HADOOP
 
 ```
