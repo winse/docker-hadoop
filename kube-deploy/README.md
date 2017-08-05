@@ -4,15 +4,7 @@
 
 #### 小工具
 
-1. docker-pull
-
-由于内网搭建了harbor作为私服，所以下载外部的镜像比较麻烦，从hub.docker.com上面拉镜像很慢。所以写了一个方法，启动一个单独的临时dockerd进程用来下载镜像，save后load到当前实际运行的docker。
-
-```
-docker-pull tomcat:7-jre7 tomcat:8.0-jre8
-```
-
-2. pod_bash
+1. pod_bash
 
 `kubectl exec -ti PODNAME bash` 能登陆到对应的容器，但是这种方式进入的窗口大小有点问题（好像行只有80字符）。ssh_pod通过获取对应的NODE的ip和容器的id进行登录。
 
@@ -20,7 +12,7 @@ docker-pull tomcat:7-jre7 tomcat:8.0-jre8
 ./ssh_pod PODNAME NAMESPACE
 ```
 
-3. docker-download-mirror.sh
+2. docker-download-mirror.sh
 
 由于内网搭建了harbor作为私服，所以下载外部的镜像比较麻烦，从hub.docker.com上面拉镜像很慢。所以写了一个方法，启动一个单独的临时dockerd进程用来下载镜像，save后load到当前实际运行的docker。
 
