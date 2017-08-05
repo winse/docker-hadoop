@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<configuration>
+
+<property>
+<name>javax.jdo.option.ConnectionURL</name><value>jdbc:mysql://192.168.0.214:3306/hive</value>
+</property>
+
+<property>
+<name>javax.jdo.option.ConnectionDriverName</name><value>com.mysql.jdbc.Driver</value>
+</property>
+
+<property>
+<name>javax.jdo.option.ConnectionUserName</name><value>hive</value>
+</property>
+
+<property>
+<name>javax.jdo.option.ConnectionPassword</name><value>hive</value>
+</property>
+
+<property>
+<name>hive.server2.thrift.bind.host</name><value>0.0.0.0</value>
+</property>
+
+<property>
+<name>hive.server2.thrift.port</name><value>10000</value>
+</property>
+
+<!--
+<property>
+  <name>hive.server2.enable.doAs</name>
+  <value>false</value>
+</property>
+
+<property>
+  <name>hive.server2.authentication</name>
+  <value>NOSASL</value>
+</property>
+-->
+
+<!--
+<property>
+<name>hive.execution.engine</name>
+<value>tez</value>
+</property>
+
+<property>
+<name>hive.aux.jars.path</name>
+<value>file:///home/hadoop/apache-hive-1.2.1-bin/elasticsearch/elasticsearch-hadoop-2.2.0.jar</value>
+</property>
+-->
+
+</configuration>

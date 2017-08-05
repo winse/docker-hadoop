@@ -1,5 +1,7 @@
 # docker-hadoop
 
+== TODO 2017-8-5 13:24:23 内容有点旧了。等测试环境使用kubeadm更新后再更新文档。
+
 用于测试环境Centos7的部署。当前使用K8S来启动管理docker。
 
 ## 配置运行K8S

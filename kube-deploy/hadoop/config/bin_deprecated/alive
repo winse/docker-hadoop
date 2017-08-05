@@ -1,0 +1,25 @@
+#!/bin/sh
+
+function check(){
+  APP="$1"
+  ps aux|grep java|grep -i "$APP"
+  return $?
+}
+
+function checkAll(){
+  times=36
+  while ((times>0)) ; do
+    echo -n '.' 
+    sleep 11;
+#    for app in "$@" ; do
+#      if ! check "$app" ; then
+#        ((times--))
+#        continue 2
+#      fi
+#    done
+    times=11
+  done
+
+}
+
+checkAll "$@"

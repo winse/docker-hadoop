@@ -26,6 +26,10 @@ function buildHadoop(){
 
 function buildDocker(){
 
+  IMAGE="cu.eshore.cn/library/hadoop:2.6.5"
+  
+  pdsh -w cu[1-5] docker rmi -f "$IMAGE"
+
   BUILD_DIR=$(mktemp -d)
   mkdir -p $BUILD_DIR
   trap "{ rm -rf $BUILD_DIR; exit 255; }" SIGINT
@@ -33,13 +37,14 @@ function buildDocker(){
   if alias | grep cp >/dev/null ; then
     unalias cp
   fi
-  cp -rf $DOCKER_ROOT/gosu-amd64 $BUILD_DIR
+#  cp -rf $DOCKER_ROOT/gosu-amd64 $BUILD_DIR
+  cp -rf $DOCKER_ROOT/hadoop.limits $BUILD_DIR
   cp -rf $DOCKER_ROOT/hadoop.Dockerfile $BUILD_DIR/Dockerfile
-  cp -rf $BUILD_ROOT/hadoop-2.6.5-src/hadoop-dist/target/hadoop-2.6.5 $BUILD_DIR
+#  cp -rf $BUILD_ROOT/hadoop-2.6.5-src/hadoop-dist/target/hadoop-2.6.5 $BUILD_DIR
   
   ls -l $BUILD_DIR
-  docker build $BUILD_DIR -t cu.eshore.cn/library/hadoop:2.6.5
-  docker push cu.eshore.cn/library/hadoop:2.6.5
+  docker build $BUILD_DIR -t "$IMAGE"
+  docker push "$IMAGE"
 
 }
 

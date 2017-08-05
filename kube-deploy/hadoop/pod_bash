@@ -1,0 +1,38 @@
+#!/bin/sh
+
+if [[ $# -lt 1 ]] ; then
+  echo "Usage: $0 podName namespace"
+  exit 1
+fi 
+
+PODS=$1
+if [[ $# -gt 2 ]] ; then
+NAMESPACE=$2
+else 
+NAMESPACE=default
+fi
+
+NODE=$( kubectl describe pods $PODS -n $NAMESPACE  | grep -E "^Node" | awk -F'/' '{print $2}' )
+POD_DESC=$( kubectl describe pods $PODS -n $NAMESPACE )
+CONTAINERS=$( echo "$POD_DESC" | grep -E "Container ID" | awk -F'/' '{print $3}' )
+
+CT_NUM=$(echo "$CONTAINERS" | wc -l )
+CONTAINER=
+if [[ $CT_NUM == 0 ]] ; then
+  exit 0
+elif [[ $CT_NUM == 1 ]] ; then
+  CONTAINER="$CONTAINERS"
+else 
+  CONTAINERS_NAME=$( echo "$POD_DESC" | grep -B 1 -E "Container ID" | grep -E '^  [a-z]*:' | sed 's/://'  )
+  echo "
+Select:
+$CONTAINERS_NAME
+"
+  read CT_NAME
+  CONTAINER=$( echo "$POD_DESC" | grep -B 1 -E "Container ID" | grep -A 1 "$CT_NAME" | grep -v "$CT_NAME" | awk -F'/' '{print $3}' ) 
+fi
+
+# ssh $( kubectl describe pods hadoop-master2 -n hd1  | grep -E "Node" | awk -F'/' '{print $2}' )
+# docker exec -ti $( kubectl describe pods hadoop-master2 -n hd1  | grep -E "Container ID" | awk -F'/' '{print $3}' ) bash
+
+ssh -t $NODE docker exec -ti $CONTAINER bash

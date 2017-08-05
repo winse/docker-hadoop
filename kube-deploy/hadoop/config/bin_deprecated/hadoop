@@ -1,0 +1,57 @@
+#!/bin/sh
+
+set -x
+
+HADOOP_HOME=/opt/hadoop-2.6.5
+DATA_HOME=/data/bigdata
+HADOOP_CONF_K8S=/opt/conf/hadoop
+
+# 
+mkdir -p /data/bigdata/pids
+mkdir -p /data/bigdata/hadoop
+chmod 700 /data/bigdata/hadoop
+
+# share 
+rm -rf $HADOOP_HOME/logs
+mkdir -p $DATA_HOME/logs
+ln -s $DATA_HOME/logs $HADOOP_HOME
+
+(
+cd $HADOOP_CONF_K8S ; 
+for f in ` ls ` ; do
+  if [ -f $HADOOP_HOME/etc/hadoop/$f ] ; then mv $HADOOP_HOME/etc/hadoop/$f $HADOOP_HOME/etc/hadoop/$f.bck ; fi
+  ln -s $HADOOP_CONF_K8S/$f $HADOOP_HOME/etc/hadoop/
+done
+)           
+
+function master(){
+  cd $HADOOP_HOME
+
+  bin/hdfs namenode -format >/data/bigdata/logs/namenode-format.log 2>&1
+  
+  sbin/hadoop-daemon.sh start namenode
+  sbin/yarn-daemon.sh start resourcemanager
+  
+  echo "wait HDFS to be ok."
+  bin/hdfs dfsadmin -safemode wait
+}
+
+function slaver(){
+  cd $HADOOP_HOME
+
+  sbin/hadoop-daemon.sh start datanode
+  sbin/yarn-daemon.sh start nodemanager
+}
+
+case "$1" in 
+  m|master|Master) 
+    master
+    ;;
+  s|slaver|Slaver) 
+    slaver
+    ;;
+  *) 
+    echo "`basename ${0}`:usage: Master | Slaver"
+    exit 1
+    ;;
+esac

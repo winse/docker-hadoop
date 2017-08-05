@@ -1,0 +1,40 @@
+# https://github.com/sonatype/docker-nexus
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nexus
+  labels:
+    k8s-app: nexus
+spec:
+  replicas: 1
+  selector:
+    k8s-app: nexus
+  template:
+    metadata:
+      labels:
+        k8s-app: nexus
+    spec:
+      hostNetwork: true
+      containers:
+      - name: nexus
+        image: sonatype/nexus:oss
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http
+          containerPort: 8081
+        volumeMounts:
+        - name: nexus-storage
+          mountPath: /sonatype-work
+        env:
+        - name: CONTEXT_PATH
+          value: /nexus
+        - name: MAX_HEAP
+          value: 256m
+        - name: MIN_HEAP
+          value: 256m
+      volumes:
+      - name: nexus-storage
+        hostPath:
+          path: /data/nexus
+      nodeSelector:
+        hostname: cu1

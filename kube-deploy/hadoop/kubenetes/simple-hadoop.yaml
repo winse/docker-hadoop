@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoop-master2
+spec:
+  ports:
+  - name: ssh
+    port: 22
+  clusterIP: None
+  selector:
+    name: hadoop-master2
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: master-vpc
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      type: master
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: hadoop-master2
+  labels:
+    app: hadoop-master
+    cluster: dta
+spec:
+  replicas: 1
+  selector:
+    app: hadoop-master
+    cluster: dta
+  template:
+    metadata:
+      name: hadoop-master2
+      labels:
+        app: hadoop-master
+        cluster: dta
+    spec:
+      containers:
+      - name: hadoop-master2
+        image: cu.eshore.cn/library/hadoop:2.6.5
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: TERM
+            value: xterm
+          - name: USER
+            value: hadoop
+        volumeMounts:
+        - name: data-master-v
+          mountPath: /data
+      volumes:
+      - name: data-master-v
+        persistentVolumeClaim:
+          claimName: master-vpc
+      nodeSelector:
+        hostname: cu2
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hadoop-slaver
+spec:
+  ports:
+  - port: 22
+  clusterIP: None
+  selector:
+    name: hadoop-slaver
+---
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: hadoop-slaver
+spec:
+  serviceName: "hadoop"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: hadoop-slaver
+        cluster: dta
+    spec:
+      containers:
+      - name: hadoop-slaver
+        image: cu.eshore.cn/library/hadoop:2.6.5
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: TERM
+            value: xterm
+          - name: USER
+            value: hadoop

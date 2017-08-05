@@ -1,0 +1,49 @@
+#!/bin/sh
+
+set -x
+
+HBASE_HOME=/opt/hbase-1.3.1
+DATA_HOME=/data/bigdata
+HBASE_CONF_K8S=/opt/conf/hbase
+
+# 
+mkdir -p $DATA_HOME/pids
+# share 
+rm -rf $HBASE_HOME/logs
+
+mkdir -p $DATA_HOME/logs
+ln -s $DATA_HOME/logs $HBASE_HOME
+
+(
+cd $HBASE_CONF_K8S ; 
+for f in ` ls ` ; do
+  if [ -f $HBASE_HOME/conf/$f ] ; then mv $HBASE_HOME/conf/$f $HBASE_HOME/conf/$f.bck ; fi
+  ln -s $HBASE_CONF_K8S/$f $HBASE_HOME/conf/
+done
+)
+
+function master(){
+  cd $HBASE_HOME
+
+  bin/hbase-daemon.sh start master
+  bin/hbase-daemon.sh start zookeeper
+}
+
+function slaver(){
+  cd $HBASE_HOME
+
+  bin/hbase-daemon.sh start regionserver
+}
+
+case "$1" in 
+  m|master|Master) 
+    master
+    ;;
+  s|slaver|Slaver) 
+    slaver
+    ;;
+  *) 
+    echo "`basename ${0}`:usage: Master | Slaver"
+    exit 1
+    ;;
+esac
