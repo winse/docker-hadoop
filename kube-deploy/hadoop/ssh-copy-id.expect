@@ -1,0 +1,18 @@
+#!/usr/bin/expect  
+
+## Usage $0 [user@]host password
+
+set host [lrange $argv 0 0];
+set password [lrange $argv 1 1] ;
+
+set timeout 30;
+
+spawn ssh-copy-id $host ;
+
+expect {
+  "(yes/no)?" { send yes\n; exp_continue; }
+  "password:" { send $password\n; exp_continue; }
+}
+
+exec sleep 1;
+

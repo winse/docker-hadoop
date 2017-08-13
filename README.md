@@ -1,14 +1,12 @@
 # docker-hadoop
 
-== TODO 2017-8-5 13:24:23 内容有点旧了。等测试环境使用kubeadm更新后再更新文档。
-
 用于测试环境Centos7的部署。当前使用K8S来启动管理docker。
 
 ## 配置运行K8S
 
 * 安装Docker-1.12
 
-当前最新的版本是Docker-1.17-ce，但是配置文件有稍许变化，与修改参数脚本中不匹配。参考(官网文档](https://docs.docker.com/v1.12/engine/installation/linux/centos/)
+当前最新的版本是Docker-v17.06，但是K8S官网适配推荐使用v1.12。参考(官网文档](https://docs.docker.com/v1.12/engine/installation/linux/centos/)
 
 ```
 sudo tee /etc/yum.repos.d/docker.repo <<-'EOF'
@@ -42,25 +40,37 @@ vi k8s.profile
 ./rsync-deploy.sh
 ```
 
-下载K8S需要的镜像，然后导入tar打包的镜像：
+下载K8S需要的RPM和镜像，然后导入tar打包的镜像：
 
-链接：http://pan.baidu.com/s/1jIv9Z8q 密码：dt7t
+链接：http://pan.baidu.com/s/1hrRs5MW
 
-各台物理机运行K8S Proxy，案例文档参考[Portable Multi-Node Cluster](https://kubernetes.io/docs/getting-started-guides/docker-multinode/)：
+各台物理机运行K8S Proxy，文档参考[Using kubeadm to Create a Cluster](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm)：
 
 ```
-# cu3
-cd kube-deploy/docker-multinode/
-./master.sh
+docker load <kubeadm.tar
+yum install -y kubelet kubeadm
 
-# others
-cd kube-deploy/docker-multinode/
-./worker.sh
+systemctl enable kubelet
+systemctl start kubelet 
+
+// master
+kubeadm init --skip-preflight-checks --pod-network-cidr=10.244.0.0/16 --kubernetes-version=v1.7.2 
+
+// worker
+kubeadm join --token ad430d.beff5be4b98dceec 192.168.0.148:6443 --skip-preflight-checks
+
+上面的命令会卡住，不要关。新开一个窗口
+sed -i 's/KUBELET_CGROUP_ARGS=--cgroup-driver=systemd/KUBELET_CGROUP_ARGS=--cgroup-driver=cgroupfs/' /etc/systemd/system/kubelet.service.d/10-kubeadm.conf 
+sed -i 's#/usr/bin/dockerd.*#/usr/bin/dockerd --ip-masq=false#' /usr/lib/systemd/system/docker.service 
+
+systemctl daemon-reload; systemctl restart docker kubelet 
+
+等一会，kubeadm就运行成功了。
 ```
-
-系统后给node打标签，运行 kube-deploy/label.sh 脚本，通过hostname更好识别主机。
 
 ## 部署私有仓库Harbor
+
+安装部署使用脚本是可以的。但测试环境就几台机器，发现维护一个Harbor成本有些高，现在手动更新。
 
 ```
 kube-deploy/easy-rsa.sh 
@@ -92,33 +102,35 @@ kube-deploy/harbor_k8s
 
 ```
 [root@cu2 hadoop]# ll build
-total 181312
-drwxr-xr-x 16 root root      4096 Apr  9 07:33 hadoop-2.6.5-src
-drwx------  8 root root      4096 Apr  9 07:33 jdk1.8.0_121
--rw-r--r--  1 root root 183246769 Apr  5 10:11 jdk-8u121-linux-x64.tar.gz
-drwx------ 10 root root      4096 Apr  9 07:33 protobuf-2.5.0
--rw-r--r--  1 root root   2401901 Jun 22  2014 protobuf-2.5.0.tar.gz
+total 181316
+lrwxrwxrwx  1 root root        28 Apr 19 12:11 hadoop-2.6.5-src -> /build/java/hadoop-2.6.5-src
+drwxr-xr-x  6 root root      4096 May 15 20:56 hbase-1.3.1
+drwxr-xr-x  8 root root      4096 Apr  9 07:33 jdk1.8.0_121
+-rwxr-xr-x  1 root root 183246769 Apr  5 10:11 jdk-8u121-linux-x64.tar.gz
+drwxr-xr-x 10 root root      4096 Apr  9 07:33 protobuf-2.5.0
+-rwxr-xr-x  1 root root   2401901 Jun 22  2014 protobuf-2.5.0.tar.gz
+lrwxrwxrwx  1 root root        26 Apr 20 09:52 zeppelin-0.7.1 -> /build/java/zeppelin-0.7.1
+drwxr-xr-x  8 cu   cu        4096 May 16 21:26 zookeeper-3.4.6
 ```
 
 第三步： 制作镜像
 
 ```
-./build.sh
+./build-java.sh
+./build-hadoop.sh
 ```
 
 然后运行部署HADOOP：
 
 ```
 cd kube-deploy/hadoop/kubenetes/
-./prepare.sh
 
-kubectl create -f hadoop-master2.yaml
-kubectl create -f hadoop-slaver.yaml 
+kubectl create -f simple-hadoop.yaml
 
-kubectl scale --current-replicas=2 --replicas=4 -f hadoop-slaver.yaml 
-
-./host.sh
+# kubectl scale --current-replicas=2 --replicas=4 -f hadoop-slaver.yaml 
 ```
+
+然后使用脚本把HOST主机上面的hadoop/hbase/hive拷贝到对应的机器，然后远程运行（脚本写的有些粗糙，暂时没提交）。
 
 如果操作的本机有显示器的话，就可以直接打开 hadoop-master2:50070 访问了。如果是远程机器的话，SSH连接时做一个socks5端口映射作为的代理即可本地访问。
 

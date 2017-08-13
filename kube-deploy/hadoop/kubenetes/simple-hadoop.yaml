@@ -86,6 +86,16 @@ spec:
         app: hadoop-slaver
         cluster: dta
     spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: NotIn
+                values:
+                - cu1
+                - cu2
       containers:
       - name: hadoop-slaver
         image: cu.eshore.cn/library/hadoop:2.6.5

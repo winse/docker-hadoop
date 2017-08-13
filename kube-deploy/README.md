@@ -20,6 +20,11 @@
 ./docker-download-mirror.sh tomcat:7-jre7 tomcat:8.0-jre8
 ```
 
+3 pods
+
+```
+kubectl get pods --all-namespaces -o wide
+```
 
 #### 部署脚本
 
@@ -34,11 +39,6 @@
 通过手动同步程序的进行部署。用着效果还行，也算一键部署了。但就是master/slaver关掉还没有好的解决方案。
 
 使用ConfigMaps进行部署，部署后就不能修改了（在容器内修改配置没效果，会被替换），这种方式对于配置优化积极性打击太大了。
-
-99. hadoop_k8s NAMESPACE
-
-把配置文件写入到ConfigMaps配置文件，然后执行使用 kubectl apply 部署（one master，two slavers），最后把部署的节点的ip和域名写入到当前操作主机，方便后面通过socks5代理访问查看网页。
-
 
 999. harbor_k8s (测试环境性能不咋的，连接好像有那么点问题。手动拷贝镜像！类似hosts...)
 
