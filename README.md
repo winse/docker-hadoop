@@ -53,10 +53,13 @@ yum install -y kubelet kubeadm
 systemctl enable kubelet
 systemctl start kubelet 
 
-// master
+## master
 kubeadm init --skip-preflight-checks --pod-network-cidr=10.244.0.0/16 --kubernetes-version=v1.7.2 
 
-// worker
+kubectl apply -f kube-flannel.yml 
+kubectl apply -f kube-flannel-rbac.yml 
+
+## worker
 kubeadm join --token ad430d.beff5be4b98dceec 192.168.0.148:6443 --skip-preflight-checks
 
 上面的命令会卡住，不要关。新开一个窗口
@@ -66,6 +69,15 @@ sed -i 's#/usr/bin/dockerd.*#/usr/bin/dockerd --ip-masq=false#' /usr/lib/systemd
 systemctl daemon-reload; systemctl restart docker kubelet 
 
 等一会，kubeadm就运行成功了。
+```
+
+然后部署监控的dashboard和heapster
+
+```
+kubectl apply -f heapster/influxdb/
+kubectl apply -f heapster/rbac/
+kubectl apply -f kubernetes-dashboard.yaml 
+
 ```
 
 ## 部署私有仓库Harbor
