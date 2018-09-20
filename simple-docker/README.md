@@ -50,7 +50,7 @@ drwxr-xr-x. 2 root root 4.0K Oct  2 00:56 WEB-INF
 
 **安装DNS服务器**
 
-用于docker容器之间通过域名来访问。也可以跳过这个步骤，启动容器后直接修改相应的 `/etc/hosts` ；或者创建一个network，通过docker容器的名称来互相访问，等等。
+用于docker容器之间通过域名来访问。也可以跳过这个步骤，启动容器后直接修改相应的 `/etc/hosts` ；或者创建一个docker network，通过docker容器的名称来互相访问，等等。
 
 ```
 [root@docker ~]# yum install dnsmasq -y
