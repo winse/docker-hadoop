@@ -1,7 +1,7 @@
 Docker-Hadoop
 =============
 
-#### 安装Docker Centos6
+### 安装Docker Centos6
 
 ```
 yum install epel-release
@@ -10,7 +10,7 @@ yum install docker-io
 service docker start
 ```
 
-#### 生成Docker-Hadoop
+### 生成Docker-Hadoop
 
 ```
 git clone https://github.com/winse/docker-hadoop.git
@@ -46,7 +46,7 @@ drwxr-xr-x. 2 root root 4.0K Oct  2 00:56 WEB-INF
 
 注： `172.17.42.1` 为docker安装后创建的网卡的地址。
 
-#### 运行测试命令
+### 运行测试命令
 
 **安装DNS服务器**
 
