@@ -19,7 +19,7 @@ cd docker-hadoop
 docker build -t spark-yarn .
 ```
 
-运行之前，需要调整下Dockerfile。或者，先把压缩包先现在到本地后，启用tomcat来最终获取文件的。
+运行之前，需要调整Dockerfile依赖文件地址。先把压缩包下载到本地后，然后启用tomcat（不太推荐直接放build目录，这样直接build整个镜像会很大！）。
 
 ```
 [root@docker docker-hadoop]# ll -h
@@ -44,9 +44,13 @@ drwxr-xr-x. 2 root root 4.0K Oct  2 00:56 WEB-INF
 
 ```
 
+注： `172.17.42.1` 为docker安装后创建的网卡的地址。
+
 #### 运行测试命令
 
-安装DNS服务器
+**安装DNS服务器**
+
+用于docker容器之间通过域名来访问。也可以跳过这个步骤，启动容器后直接修改相应的 `/etc/hosts` ；或者创建一个network，通过docker容器的名称来互相访问，等等。
 
 ```
 [root@docker ~]# yum install dnsmasq -y
@@ -86,6 +90,8 @@ f6e63b311e60        hadoop:latest       /bin/sh -c '/usr/sbi   6 seconds ago    
 [root@docker ~]# service dnsmasq restart
 
 [root@docker ~]# ssh-copy-id hadoop@master
+
+# 进入master节点，启动集群
 [root@docker ~]# ssh hadoop@master
 
   [hadoop@master ~]$ cd /opt/hadoop-2.5.1/
@@ -117,6 +123,6 @@ f6e63b311e60        hadoop:latest       /bin/sh -c '/usr/sbi   6 seconds ago    
   132 Master --ip master --port 7077 --webui-port 8080
 ```
 
-如果你为ssh访问添加了隧道，还可以直接在windows本地通过浏览器访问web页面：
+为ssh访问添加了sock5隧道，直接在windows本地通过浏览器访问web页面：
 
 ![Web View](https://cloud.githubusercontent.com/assets/667902/4495346/af4cbbf4-4a5a-11e4-9621-8a6c5d1a3a3a.png)
